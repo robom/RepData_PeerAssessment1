@@ -60,6 +60,25 @@ median(total_steps$total)
 ## What is the average daily activity pattern?
 
 
+```r
+steps_per_interval <- activity %>% 
+  group_by(interval) %>% 
+  summarize(mean = mean(steps, na.rm = TRUE))
+plot(steps_per_interval, type = 'l', main = "Average number of steps per interval",
+     xlab = "Time interval", ylab = "Average number of steps")
+```
+
+![](PA1_template_files/figure-html/timeseries-1.png) 
+
+
+```r
+max_steps <- max(steps_per_interval$mean)
+subset(steps_per_interval, mean == max_steps)$interval
+```
+
+```
+## [1] 835
+```
 
 ## Imputing missing values
 

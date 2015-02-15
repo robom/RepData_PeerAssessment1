@@ -49,7 +49,22 @@ median(total_steps$total)
 
 ## What is the average daily activity pattern?
 
+Below, we can see as the number of steps changes throught the day (averaged across all the days).
 
+```{r timeseries}
+steps_per_interval <- activity %>% 
+  group_by(interval) %>% 
+  summarize(mean = mean(steps, na.rm = TRUE))
+plot(steps_per_interval, type = 'l', main = "Average number of steps per interval",
+     xlab = "Time interval", ylab = "Average number of steps")
+```
+
+The 5-minute interval with maximum number of steps is as follows:
+
+```{r}
+max_steps <- max(steps_per_interval$mean)
+subset(steps_per_interval, mean == max_steps)$interval
+```
 
 ## Imputing missing values
 
