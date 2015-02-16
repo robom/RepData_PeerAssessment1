@@ -59,6 +59,8 @@ median(total_steps$total)
 
 ## What is the average daily activity pattern?
 
+Below, we can see as the number of steps changes throught the day (averaged across all the days).
+
 
 ```r
 steps_per_interval <- activity %>% 
@@ -69,6 +71,8 @@ plot(steps_per_interval, type = 'l', main = "Average number of steps per interva
 ```
 
 ![](PA1_template_files/figure-html/timeseries-1.png) 
+
+The 5-minute interval with maximum number of steps is as follows:
 
 
 ```r
@@ -82,6 +86,63 @@ subset(steps_per_interval, mean == max_steps)$interval
 
 ## Imputing missing values
 
+The total number of rows with missing values:
 
+
+```r
+sum(!complete.cases(activity))
+```
+
+```
+## [1] 2304
+```
+
+We fill the missing values of steps with the average number of steps
+for the given 5-minute interval.
+
+
+```r
+interval_means <- sapply(activity$interval, 
+                         function(x) subset(steps_per_interval, interval == x)$mean)
+missing <- is.na(activity$steps)
+
+activity_imputed <- activity
+activity_imputed[missing, ]$steps <- interval_means[missing]
+```
+
+Next, we calculate total number of steps on the imputed data and visualize the histogram
+in order to compare it with the original data.
+
+
+```r
+total_steps_imputed <- activity_imputed %>% 
+  group_by(date) %>% 
+  summarize(total = sum(steps))
+
+hist(total_steps_imputed$total, breaks = 10, main = 
+       "Histogram of total number of steps per day with no missing values",
+     xlab = "Total number of steps per day")
+```
+
+![](PA1_template_files/figure-html/histogram_imputed-1.png) 
+
+For the sake of comparison, we also compute new *mean* and *median* values of the total number of steps.
+
+
+```r
+mean(total_steps_imputed$total)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
+median(total_steps_imputed$total)
+```
+
+```
+## [1] 10766.19
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
