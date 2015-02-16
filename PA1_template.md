@@ -1,4 +1,9 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
 
 
@@ -36,7 +41,7 @@ hist(total_steps$total, breaks = 10, main = "Histogram of total number of steps 
      xlab = "Total number of steps per day")
 ```
 
-![](PA1_template_files/figure-html/hist-1.png) 
+![plot of chunk hist](figure/hist-1.png) 
 
 Finally, we compute *mean* and *median* values of the total number of steps.
 
@@ -70,7 +75,7 @@ plot(steps_per_interval, type = 'l', main = "Average number of steps per interva
      xlab = "Time interval", ylab = "Average number of steps")
 ```
 
-![](PA1_template_files/figure-html/timeseries-1.png) 
+![plot of chunk timeseries](figure/timeseries-1.png) 
 
 The 5-minute interval with maximum number of steps is as follows:
 
@@ -124,9 +129,10 @@ hist(total_steps_imputed$total, breaks = 10, main =
      xlab = "Total number of steps per day")
 ```
 
-![](PA1_template_files/figure-html/histogram_imputed-1.png) 
+![plot of chunk histogram_imputed](figure/histogram_imputed-1.png) 
 
-For the sake of comparison, we also compute new *mean* and *median* values of the total number of steps.
+For the sake of comparison, we also compute new *mean* and *median* values 
+of the total number of steps.
 
 
 ```r
@@ -145,4 +151,44 @@ median(total_steps_imputed$total)
 ## [1] 10766.19
 ```
 
+We can see that the chosen strategy has no effect on the mean; 
+the median is a bit higher and now equal to the mean.
+
 ## Are there differences in activity patterns between weekdays and weekends?
+
+We add a column `day_in_week` (a factor variable) which indicates whether the measuring occurred
+during a weekday or a weekend.
+
+
+```r
+day_in_week <- function(date) {
+  wday <- wday(date)
+  is_weekend <- wday == 1 | wday == 6
+  
+  day_in_week <- character(length = length(date))
+  day_in_week[is_weekend] <- "weekend"
+  day_in_week[!is_weekend] <- "weekday"
+  
+  return(as.factor(day_in_week))
+}
+
+activity_imputed <- activity_imputed %>% mutate(day_in_week = day_in_week(date))
+```
+
+Finally, we plot the time series of number of steps per intervals 
+comparing the weekdays and weekends. We use `ggplot` library for this purpose.
+
+
+```r
+steps_per_interval_imputed <- activity_imputed %>% 
+  group_by(interval, day_in_week) %>% 
+  summarize(mean = mean(steps, na.rm = TRUE))
+
+library(ggplot2)
+g <- ggplot(steps_per_interval_imputed, aes(interval, mean))
+g <- g + facet_grid(day_in_week ~ .)
+g <- g + geom_line()
+g + xlab("Interval") + ylab("Number of steps")
+```
+
+![plot of chunk timeseries_compare](figure/timeseries_compare-1.png) 

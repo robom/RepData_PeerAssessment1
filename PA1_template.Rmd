@@ -111,3 +111,36 @@ We can see that the chosen strategy has no effect on the mean;
 the median is a bit higher and now equal to the mean.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+We add a column `day_in_week` (a factor variable) which indicates whether the measuring occurred
+during a weekday or a weekend.
+
+```{r day_in_week}
+day_in_week <- function(date) {
+  wday <- wday(date)
+  is_weekend <- wday == 1 | wday == 6
+  
+  day_in_week <- character(length = length(date))
+  day_in_week[is_weekend] <- "weekend"
+  day_in_week[!is_weekend] <- "weekday"
+  
+  return(as.factor(day_in_week))
+}
+
+activity_imputed <- activity_imputed %>% mutate(day_in_week = day_in_week(date))
+```
+
+Finally, we plot the time series of number of steps per intervals 
+comparing the weekdays and weekends. We use `ggplot` library for this purpose.
+
+```{r timeseries_compare, message=FALSE, warning=FALSE}
+steps_per_interval_imputed <- activity_imputed %>% 
+  group_by(interval, day_in_week) %>% 
+  summarize(mean = mean(steps, na.rm = TRUE))
+
+library(ggplot2)
+g <- ggplot(steps_per_interval_imputed, aes(interval, mean))
+g <- g + facet_grid(day_in_week ~ .)
+g <- g + geom_line()
+g + xlab("Interval") + ylab("Number of steps")
+```
